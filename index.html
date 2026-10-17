@@ -108,7 +108,9 @@ body.out #login{display:grid}
 .role:hover{border-color:var(--brand-2)}
 .role.sel{border-color:var(--brand);outline:2px solid var(--brand);background:var(--brand-soft)}
 .demo{font-size:12px;color:var(--muted);text-align:center;margin-top:14px}
-header.top .user a{color:#fff;opacity:.85;font-size:12px}
+#logoutBtn{flex:none;font:inherit;font-size:13px;font-weight:600;color:#fff;background:transparent;border:1px solid rgba(255,255,255,.6);border-radius:8px;padding:6px 12px;cursor:pointer;text-decoration:none}
+#logoutBtn:hover{background:rgba(255,255,255,.15)}
+nav.side a.signout{color:var(--danger);border-top:1px solid var(--line);padding-top:12px}
 @media (max-width:520px){.roles{grid-template-columns:1fr}}
 @media (max-width:820px){
   #menuBtn{display:block}
@@ -145,7 +147,8 @@ header.top .user a{color:#fff;opacity:.85;font-size:12px}
   <button id="menuBtn" aria-label="Menu">☰</button>
   <div class="crest">MoH</div>
   <h1>Department of Hospital Services<small>Facility Registration &amp; Licensing Portal — <span id="hdrState">Lagos</span> State<span class="chip" id="hdrCode">LAG</span></small></h1>
-  <div class="user">Signed in as <b id="whoName">A. Okafor</b><br><span id="whoRole">Ministry Officer</span> · <a href="#" id="signOut">Sign out</a></div>
+  <div class="user">Signed in as <b id="whoName">A. Okafor</b><br><span id="whoRole">Ministry Officer</span></div>
+  <a href="#" id="logoutBtn">Log out</a>
 </header>
 
 <div class="layout">
@@ -785,8 +788,10 @@ $$('.role').forEach(b=>b.onclick=()=>pickRole(b.dataset.r));pickRole(pick);
 $('#loginForm').onsubmit=e=>{e.preventDefault();ROLE=pick;
   if(ROLES[ROLE].state)setState($('#lgStateSel').value);
   document.body.classList.remove('out');applyRole();location.hash='';show();};
-const so=document.createElement('a');so.href='#';so.textContent='Sign out';so.style.marginTop='12px';so.className='signout';$('#nav').append(so);
-$$('#signOut,.signout').forEach(a=>a.onclick=e=>{e.preventDefault();ROLE=null;history.replaceState(null,'',location.pathname);document.body.classList.add('out');$('#nav').classList.remove('open');});
+const so=document.createElement('a');so.href='#';so.textContent='Log out';so.style.marginTop='12px';so.className='signout';$('#nav').append(so);
+function logout(e){e.preventDefault();ROLE=null;history.replaceState(null,'',location.pathname);
+  document.body.classList.add('out');$('#nav').classList.remove('open');$('#loginForm').reset();pickRole('facility');window.scrollTo(0,0);}
+$$('#logoutBtn,.signout').forEach(a=>a.onclick=logout);
 
 $('#uploads').innerHTML='ABCDEF'.split('').map(l=>`<div class="upl c6"><b>${l}</b><span>Document ${l} <span class="hint">(type TBD)</span></span><input type="file"></div>`).join('');
 </script>
