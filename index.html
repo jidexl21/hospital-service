@@ -80,6 +80,20 @@ tfoot td{font-weight:700}
 .upl span{flex:1;font-size:13.5px}
 .upl input{width:auto;border:none;background:none;padding:0;font-size:12px;max-width:200px}
 .hidden{display:none!important}
+.chip{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;padding:1px 7px;border-radius:5px;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);margin-left:6px;vertical-align:1px}
+.tiles{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(190px,1fr))}
+.tile{display:flex;flex-direction:column;gap:4px;text-align:left;font:inherit;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:14px;cursor:pointer;box-shadow:var(--shadow)}
+.tile:hover{border-color:var(--brand-2)}
+.tile.sel{border-color:var(--brand);outline:2px solid var(--brand)}
+.tile b{font-size:15px}
+.tile .code{font-size:12px;color:var(--muted);font-family:Consolas,monospace}
+.catgrid{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(280px,1fr))}
+.catcard{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+.catcard .letter{width:34px;height:34px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font-weight:700;font-size:16px;float:left;margin-right:10px}
+.catcard h4{margin:0;font-size:15px}
+.catcard .types{font-size:13px;color:var(--muted);margin:2px 0 10px}
+.catcard ul{clear:both;margin:8px 0 0;padding-left:18px;font-size:13.5px}
+.tbd{color:var(--muted);font-style:italic}
 @media (max-width:820px){
   #menuBtn{display:block}
   header.top .user{display:none}
@@ -95,12 +109,15 @@ tfoot td{font-weight:700}
 <header class="top">
   <button id="menuBtn" aria-label="Menu">☰</button>
   <div class="crest">MoH</div>
-  <h1>Department of Hospital Services<small>Facility Registration &amp; Licensing Portal — Lagos State (demo)</small></h1>
+  <h1>Department of Hospital Services<small>Facility Registration &amp; Licensing Portal — <span id="hdrState">Lagos</span> State<span class="chip" id="hdrCode">LAG</span></small></h1>
   <div class="user">Signed in as <b>A. Okafor</b><br>Ministry Officer</div>
 </header>
 
 <div class="layout">
 <nav class="side" id="nav">
+  <div class="grp">Start</div>
+  <a href="#states">Select State</a>
+  <a href="#categories">Facility Categories &amp; Criteria</a>
   <div class="grp">Registration / Transaction</div>
   <a href="#intent">Letter of Intention</a>
   <a href="#application">Application</a>
@@ -118,9 +135,138 @@ tfoot td{font-weight:700}
   <div class="grp">Renewal</div>
   <a href="#renewalnotice">Renewal Notice</a>
   <a href="#renewal">Renewal Form</a>
+  <div class="grp">Reports</div>
+  <a href="#report">Facilities by LGA &amp; Zone</a>
+  <div class="grp">State Setup (State Admin)</div>
+  <a href="#setupcat">Categories &amp; Criteria</a>
+  <a href="#lgas">Local Government Areas</a>
+  <a href="#zones">Zones</a>
+  <div class="grp">Platform (Super Admin)</div>
+  <a href="#onboard">Onboard a State</a>
 </nav>
 
 <main>
+
+<!-- SELECT STATE (landing) -->
+<section class="form" id="states">
+  <div class="crumb">Start › Select State</div>
+  <h2>Select your state</h2>
+  <p class="lead">These states are onboarded on the platform. Pick the state where your facility is located; everything you submit is filed under that state.</p>
+  <div class="tiles" id="stateTiles"></div>
+  <div class="card" style="margin-top:16px"><h3>State not listed?</h3>
+    <p style="margin:0 0 12px">Your state's hospital management board must be onboarded before facilities in that state can register. The board can apply below.</p>
+    <div class="grid">
+      <label class="f c4">State<select id="applyState"></select></label>
+      <label class="f c8">Hospital Management Board / Agency<input placeholder="e.g. Ogun State Hospitals Management Board"></label>
+      <label class="f c4">Contact Person<input></label>
+      <label class="f c4">Phone<input type="tel"></label>
+      <label class="f c4">Email<input type="email"></label>
+    </div>
+    <div class="btns"><button class="btn primary">Apply to be Onboarded</button></div>
+  </div>
+</section>
+
+<!-- CATEGORIES (public, static) -->
+<section class="form" id="categories">
+  <div class="crumb">Start › Facility Categories &amp; Criteria</div>
+  <h2>Facility categories &amp; criteria</h2>
+  <p class="lead">Check which category your facility qualifies for before you apply. You will pick this category on the application form.</p>
+  <div class="note info">Categories and criteria are set by the <b class="stName">Lagos</b> State hospital management board.</div>
+  <div class="catgrid" id="catCards"></div>
+  <div class="btns" style="margin-top:16px"><a class="btn primary" href="#application" style="text-decoration:none">Start Application</a></div>
+</section>
+
+<!-- STATE SETUP: CATEGORIES -->
+<section class="form" id="setupcat">
+  <div class="crumb">State Setup › Categories &amp; Criteria</div>
+  <h2>Categories &amp; Criteria</h2>
+  <p class="lead">State admin maintains categories A–F, the facility types in each and their criteria. These feed the public criteria page and the application drop-down.</p>
+  <div class="card">
+    <div class="grid">
+      <label class="f c3">Category<select id="scCat"></select></label>
+      <label class="f c9" style="grid-column:span 9">Facility Types Covered<input id="scTypes"></label>
+      <label class="f c12">Criteria (one per line)<textarea id="scCrit" placeholder="e.g. Minimum number of beds&#10;Required specialist personnel&#10;Required equipment"></textarea></label>
+    </div>
+    <div class="btns"><button class="btn primary" id="scSave">Save Category</button></div>
+  </div>
+</section>
+
+<!-- STATE SETUP: LGAs -->
+<section class="form" id="lgas">
+  <div class="crumb">State Setup › Local Government Areas</div>
+  <h2>Local Government Areas</h2>
+  <p class="lead">LGAs must exist before facilities can be registered against them. Add them one at a time or import a list.</p>
+  <div class="card"><h3>Add LGA</h3>
+    <div class="grid">
+      <label class="f c4">LGA Name<input id="lgaName"></label>
+      <label class="f c4">LGA Code<input id="lgaCode" placeholder="e.g. IKJ"></label>
+      <label class="f c4">HQ / Town<input></label>
+    </div>
+    <div class="btns"><button class="btn primary" id="lgaAdd">Add LGA</button></div>
+  </div>
+  <div class="card"><h3>Import LGAs</h3>
+    <div class="upl"><b>⇪</b><span>CSV with columns: Name, Code, HQ <span class="hint">· one row per LGA</span></span><input type="file" accept=".csv"></div>
+    <div class="btns"><button class="btn">Download Template</button><button class="btn primary">Import</button></div>
+  </div>
+  <div class="card"><h3><span class="stName">Lagos</span> State LGAs</h3>
+    <div class="tablewrap"><table><thead><tr><th>LGA</th><th>Code</th><th class="num">Zones</th><th class="num">Facilities</th></tr></thead><tbody id="lgaTbl"></tbody></table></div>
+  </div>
+</section>
+
+<!-- STATE SETUP: ZONES -->
+<section class="form" id="zones">
+  <div class="crumb">State Setup › Zones</div>
+  <h2>Zones</h2>
+  <p class="lead">Each zone belongs to an LGA. A facility's location is captured as state, LGA and zone.</p>
+  <div class="card"><h3>Add Zone</h3>
+    <div class="grid">
+      <label class="f c6">LGA<select class="lga" id="zLga"></select></label>
+      <label class="f c6">Zone Name<input id="zName"></label>
+    </div>
+    <div class="btns"><button class="btn primary" id="zAdd">Add Zone</button></div>
+  </div>
+  <div class="card"><h3>Zones</h3>
+    <div class="tablewrap"><table><thead><tr><th>Zone</th><th>LGA</th><th class="num">Facilities</th></tr></thead><tbody id="zoneTbl"></tbody></table></div>
+  </div>
+</section>
+
+<!-- SUPER ADMIN: ONBOARD STATE -->
+<section class="form" id="onboard">
+  <div class="crumb">Platform › Onboard a State</div>
+  <h2>Onboard a State</h2>
+  <p class="lead">A state is onboarded after it has agreed terms with the vendor. Once active, it appears on the landing page and its admin can set up categories, LGAs and zones.</p>
+  <div class="card"><h3>New State Tenant</h3>
+    <div class="grid">
+      <label class="f c4">State<select id="obState"></select></label>
+      <label class="f c4">State Code<input id="obCode" readonly></label>
+      <label class="f c4">Agreement Date<input type="date"></label>
+      <label class="f c6">Hospital Management Board / Agency<input></label>
+      <label class="f c6">State Admin Email<input type="email" placeholder="Invite sent to this address"></label>
+    </div>
+    <div class="btns"><button class="btn primary" id="obBtn">Onboard State</button></div>
+  </div>
+  <div class="card"><h3>Participating States</h3>
+    <div class="tablewrap"><table><thead><tr><th>State</th><th>Code</th><th>Status</th><th class="num">Facilities</th></tr></thead><tbody id="obTbl"></tbody></table></div>
+  </div>
+</section>
+
+<!-- REPORT -->
+<section class="form" id="report">
+  <div class="crumb">Reports › Facilities by LGA &amp; Zone</div>
+  <h2>Facilities by LGA &amp; Zone</h2>
+  <p class="lead">Mix of facility categories and number of beds in each LGA and zone of <span class="stName">Lagos</span> State.</p>
+  <div class="card">
+    <div class="grid">
+      <label class="f c4">LGA<select id="rLga"></select></label>
+      <label class="f c4">Group By<select id="rBy"><option value="lga">LGA</option><option value="zone">Zone</option></select></label>
+      <div class="f c4" style="justify-content:flex-end"><button class="btn">Export (Excel)</button></div>
+    </div>
+  </div>
+  <div class="card"><div class="tablewrap"><table id="rTbl"><thead></thead><tbody></tbody><tfoot></tfoot></table></div></div>
+  <div class="card"><h3>Facility Listing</h3>
+    <div class="tablewrap"><table><thead><tr><th>Facility</th><th>Category</th><th>LGA</th><th>Zone</th><th class="num">Beds</th><th>Association</th></tr></thead><tbody id="listTbl"></tbody></table></div>
+  </div>
+</section>
 
 <!-- LETTER OF INTENTION -->
 <section class="form" id="intent">
@@ -159,7 +305,7 @@ tfoot td{font-weight:700}
       <label class="f c8">Owner's Name <span class="req">*</span><input id="ownerName" placeholder="Full name of facility owner"></label>
       <label class="f c4">Profession<input></label>
       <label class="f c4">Application No.<input id="appNo" readonly><span class="hint">System-generated</span></label>
-      <label class="f c4">Category<select class="cat"></select><span class="hint">From category table</span></label>
+      <label class="f c4">Category <span class="req">*</span><select class="cat"></select><span class="hint"><a href="#categories">Check category criteria</a></span></label>
       <label class="f c4">Date Applied<input type="date" id="dateApplied"></label>
       <label class="f c12">Proposed Name <span class="req">*</span><input id="propName">
         <span class="inline"><label><input type="checkbox" id="useOwner"> Same as owner's name</label></span></label>
@@ -182,9 +328,9 @@ tfoot td{font-weight:700}
       <label class="f c12">Address<input></label>
       <label class="f c6">Facility Email<input type="email"></label>
       <label class="f c6">Town<input></label>
-      <label class="f c4">State<select class="state"></select></label>
-      <label class="f c4">LGA<select class="lga"></select></label>
-      <label class="f c4">LCDA / Zone<select class="zone"></select></label>
+      <label class="f c4">State<input class="stField" readonly><span class="hint">Set by the state you selected</span></label>
+      <label class="f c4">LGA <span class="req">*</span><select class="lga lgaPick"></select></label>
+      <label class="f c4">Zone <span class="req">*</span><select class="zone"></select><span class="hint">Zones in the selected LGA</span></label>
       <label class="f c8">Nearest Bus Stop<input></label>
       <label class="f c4">Premises Type<select><option>Purpose-built</option><option>Converted residential</option><option>Shared / plaza</option></select></label>
     </div>
@@ -398,7 +544,7 @@ tfoot td{font-weight:700}
   <div class="card chg" data-k="name"><h3>New Name</h3><div class="grid"><label class="f c12">Proposed New Name<input></label></div></div>
   <div class="card chg hidden" data-k="addr"><h3>New Address</h3><div class="grid">
     <label class="f c12">Address<input></label>
-    <label class="f c4">State<select class="state"></select></label><label class="f c4">LGA<select class="lga"></select></label><label class="f c4">LCDA / Zone<select class="zone"></select></label>
+    <label class="f c4">State<input class="stField" readonly></label><label class="f c4">LGA<select class="lga lgaPick"></select></label><label class="f c4">Zone<select class="zone"></select></label>
   </div></div>
   <div class="card chg hidden" data-k="up"><h3>Upgrade</h3><div class="grid">
     <label class="f c6">Current Type<input readonly value="Clinic"></label>
@@ -460,17 +606,65 @@ tfoot td{font-weight:700}
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const opts=(cls,list)=>$$(cls).forEach(s=>s.innerHTML=list.map(o=>`<option>${o}</option>`).join(''));
 opts('.ftype',['Hospital','Specialist Hospital','Clinic','Health Centre','Maternity Home','Diagnostic Centre','Dental Clinic','Eye Clinic']);
-opts('.cat',['Category A','Category B','Category C','Category D']);
-opts('.state',['Lagos','Ogun','Oyo','FCT']);
-opts('.lga',['Ikeja','Alimosho','Surulere','Eti-Osa','Kosofe','Oshodi-Isolo','Ikorodu','Lagos Island']);
-opts('.zone',['Ojodu LCDA','Onigbongbo LCDA','Ikosi-Isheri LCDA','Yaba LCDA','Ikoyi-Obalende LCDA']);
+// ---- multi-state data (demo) ----
+const STATES=[['Abia','ABI'],['Adamawa','ADA'],['Akwa Ibom','AKW'],['Anambra','ANA'],['Bauchi','BAU'],['Bayelsa','BAY'],['Benue','BEN'],['Borno','BOR'],['Cross River','CRS'],['Delta','DEL'],['Ebonyi','EBO'],['Edo','EDO'],['Ekiti','EKI'],['Enugu','ENU'],['FCT','FCT'],['Gombe','GOM'],['Imo','IMO'],['Jigawa','JIG'],['Kaduna','KAD'],['Kano','KAN'],['Katsina','KAT'],['Kebbi','KEB'],['Kogi','KOG'],['Kwara','KWA'],['Lagos','LAG'],['Nasarawa','NAS'],['Niger','NIG'],['Ogun','OGU'],['Ondo','OND'],['Osun','OSU'],['Oyo','OYO'],['Plateau','PLA'],['Rivers','RIV'],['Sokoto','SOK'],['Taraba','TAR'],['Yobe','YOB'],['Zamfara','ZAM']].map(([n,c])=>({n,c,on:['LAG','OGU','OYO','FCT'].includes(c)}));
+const GEO={ // state code -> LGA -> zones
+  LAG:{'Ikeja':['Ikeja Central','Ojodu LCDA','Onigbongbo LCDA'],'Alimosho':['Agbado/Oke-Odo LCDA','Ayobo-Ipaja LCDA'],'Surulere':['Itire-Ikate LCDA','Coker-Aguda LCDA'],'Eti-Osa':['Ikoyi-Obalende LCDA','Iru/Victoria Island LCDA'],'Kosofe':['Ikosi-Isheri LCDA','Agboyi-Ketu LCDA'],'Lagos Mainland':['Yaba LCDA']},
+  OGU:{'Abeokuta South':['Ake','Ibara'],'Ijebu Ode':['Ijebu Ode Central'],'Ado-Odo/Ota':['Ota','Sango']},
+  OYO:{'Ibadan North':['Bodija','Agodi'],'Ogbomosho North':['Ogbomosho Central']},
+  FCT:{'AMAC':['Garki','Wuse','Maitama'],'Bwari':['Kubwa'],'Gwagwalada':['Gwagwalada Central']}
+};
+const CATS={A:{t:'Specialist hospitals',c:[]},B:{t:'Cardiac centres',c:[]},C:{t:'Laboratories',c:[]},D:{t:'Clinics',c:[]},E:{t:'',c:[]},F:{t:'',c:[]}};
+const FAC=[ // state, name, cat, lga, zone, beds, association
+  ['LAG','Grace Specialist Clinic','D','Ikeja','Ojodu LCDA',12,'ANPMP'],['LAG','Lagos Heart Institute','B','Eti-Osa','Ikoyi-Obalende LCDA',40,'—'],
+  ['LAG','Mercy Maternity Home','D','Alimosho','Ayobo-Ipaja LCDA',18,'ANPMP'],['LAG','Hope Medical Centre','A','Ikeja','Ikeja Central',65,'ANPMP'],
+  ['LAG','Prime Diagnostics Lab','C','Surulere','Itire-Ikate LCDA',0,'—'],['LAG','St. Luke Specialist Hospital','A','Kosofe','Ikosi-Isheri LCDA',80,'ANPMP'],
+  ['LAG','Yaba Family Clinic','D','Lagos Mainland','Yaba LCDA',8,'—'],['LAG','Victoria Cardiac Centre','B','Eti-Osa','Iru/Victoria Island LCDA',30,'—'],
+  ['LAG','Ojodu Medical Laboratory','C','Ikeja','Ojodu LCDA',0,'ANPMP'],['LAG','Agbado Community Clinic','D','Alimosho','Agbado/Oke-Odo LCDA',10,'—'],
+  ['OGU','Ake Specialist Hospital','A','Abeokuta South','Ake',55,'ANPMP'],['OGU','Ota Clinic','D','Ado-Odo/Ota','Ota',9,'—'],
+  ['OYO','Bodija Heart Centre','B','Ibadan North','Bodija',24,'—'],['OYO','Agodi Lab Services','C','Ibadan North','Agodi',0,'ANPMP'],
+  ['FCT','Garki Specialist Hospital','A','AMAC','Garki',90,'—'],['FCT','Kubwa Family Clinic','D','Bwari','Kubwa',11,'ANPMP']];
+let ST=STATES.find(s=>s.c==='LAG');
+const catLabel=k=>`Category ${k}`+(CATS[k].t?` — ${CATS[k].t}`:'');
+function fillCats(){opts('.cat',Object.keys(CATS).map(catLabel));}
+function fillZones(){$$('.lgaPick').forEach(l=>{const z=l.closest('.grid').querySelector('.zone');
+  if(z)z.innerHTML=(GEO[ST.c][l.value]||[]).map(o=>`<option>${o}</option>`).join('');});}
+function fillGeo(){const L=Object.keys(GEO[ST.c]||{});opts('.lga',L);$('#rLga').innerHTML='<option value="">All LGAs</option>'+L.map(o=>`<option>${o}</option>`).join('');fillZones();}
+function renderStates(){
+  $('#stateTiles').innerHTML=STATES.filter(s=>s.on).map(s=>`<button class="tile${s===ST?' sel':''}" data-c="${s.c}"><b>${s.n} State</b><span class="code">${s.c}</span><span class="hint">${FAC.filter(f=>f[0]===s.c).length} registered facilities</span></button>`).join('');
+  $$('#stateTiles .tile').forEach(b=>b.onclick=()=>{setState(b.dataset.c);location.hash='#categories';});
+  $('#applyState').innerHTML=STATES.filter(s=>!s.on).map(s=>`<option>${s.n}</option>`).join('');
+  $('#obState').innerHTML=STATES.filter(s=>!s.on).map(s=>`<option value="${s.c}">${s.n}</option>`).join('');$('#obCode').value=$('#obState').value;
+  $('#obTbl').innerHTML=STATES.filter(s=>s.on).map(s=>`<tr><td>${s.n}</td><td>${s.c}</td><td><span class="pill">Active</span></td><td class="num">${FAC.filter(f=>f[0]===s.c).length}</td></tr>`).join('');}
+function setState(c){const prev=ST.c;ST=STATES.find(s=>s.c===c);if(!GEO[c])GEO[c]={};
+  $('#hdrState').textContent=ST.n;$('#hdrCode').textContent=ST.c;$$('.stName').forEach(e=>e.textContent=ST.n);$$('.stField').forEach(e=>e.value=ST.n);
+  $$('input').forEach(i=>{if(i.value&&i.value.startsWith(prev+'/'))i.value=ST.c+i.value.slice(prev.length);});
+  $$('.cert .hint').forEach(e=>e.textContent=e.textContent.replaceAll(prev+'/',ST.c+'/'));
+  if($('#appNo').value)$('#appNo').value=$('#appNo').value.replace('/'+prev+'/','/'+ST.c+'/');
+  fillGeo();renderStates();renderLga();renderZones();renderReport();}
+function renderCats(){$('#catCards').innerHTML=Object.entries(CATS).map(([k,v])=>`<div class="catcard"><div class="letter">${k}</div><h4>Category ${k}</h4>
+  <div class="types">${v.t||'<span class="tbd">Facility types to be set by state admin</span>'}</div>
+  <ul>${v.c.length?v.c.map(x=>`<li>${x}</li>`).join(''):'<li class="tbd">Criteria to be set by state admin</li>'}</ul></div>`).join('');}
+function renderLga(){$('#lgaTbl').innerHTML=Object.entries(GEO[ST.c]).map(([l,z])=>`<tr><td>${l}</td><td>${l.replace(/[^A-Z]/g,'').slice(0,3)||l.slice(0,3).toUpperCase()}</td><td class="num">${z.length}</td><td class="num">${FAC.filter(f=>f[0]===ST.c&&f[3]===l).length}</td></tr>`).join('')||'<tr><td colspan="4" class="tbd">No LGAs yet — add or import them above.</td></tr>';}
+function renderZones(){const r=[];Object.entries(GEO[ST.c]).forEach(([l,zs])=>zs.forEach(z=>r.push(`<tr><td>${z}</td><td>${l}</td><td class="num">${FAC.filter(f=>f[0]===ST.c&&f[4]===z).length}</td></tr>`)));
+  $('#zoneTbl').innerHTML=r.join('')||'<tr><td colspan="3" class="tbd">No zones yet.</td></tr>';}
+function renderReport(){const by=$('#rBy').value,lf=$('#rLga').value,K=Object.keys(CATS);
+  const fs=FAC.filter(f=>f[0]===ST.c&&(!lf||f[3]===lf)),idx=by==='lga'?3:4,groups={};
+  fs.forEach(f=>{const g=groups[f[idx]]??=Object.fromEntries(K.map(k=>[k,0]).concat([['beds',0]]));g[f[2]]++;g.beds+=f[5];});
+  $('#rTbl thead').innerHTML=`<tr><th>${by==='lga'?'LGA':'Zone'}</th>${K.map(k=>`<th class="num">Cat ${k}</th>`).join('')}<th class="num">Total</th><th class="num">Beds</th></tr>`;
+  const row=(n,g)=>`<td>${n}</td>${K.map(k=>`<td class="num">${g[k]||''}</td>`).join('')}<td class="num">${K.reduce((s,k)=>s+g[k],0)}</td><td class="num">${g.beds}</td>`;
+  $('#rTbl tbody').innerHTML=Object.entries(groups).map(([n,g])=>`<tr>${row(n,g)}</tr>`).join('')||`<tr><td colspan="${K.length+3}" class="tbd">No registered facilities.</td></tr>`;
+  const T=Object.fromEntries(K.map(k=>[k,fs.filter(f=>f[2]===k).length]).concat([['beds',fs.reduce((s,f)=>s+f[5],0)]]));
+  $('#rTbl tfoot').innerHTML=`<tr>${row('Total',T)}</tr>`;
+  $('#listTbl').innerHTML=fs.map(f=>`<tr><td>${f[1]}</td><td>${f[2]}</td><td>${f[3]}</td><td>${f[4]}</td><td class="num">${f[5]}</td><td>${f[6]}</td></tr>`).join('');}
+fillCats();renderCats();
 opts('.fac',['FAC-0417 · Grace Specialist Clinic','FAC-0416 · Mercy Maternity Home','FAC-0211 · Hope Medical Centre']);
 opts('.officer',['Dr. A. Okafor (Director)','Mrs. T. Adeyemi','Mr. K. Hassan','Dr. R. Eze','Pharm. O. Bakare']);
 const levies=[['Application form',25000],['Inspection fee',50000],['Registration',150000],['Signpost',20000],['Others',0]];
 opts('.levy',levies.map(l=>l[0]));
 
 // nav
-function show(){const id=(location.hash||'#application').slice(1);
+function show(){const id=(location.hash||'#states').slice(1);
   $$('section.form').forEach(s=>s.classList.toggle('show',s.id===id));
   $$('nav.side a').forEach(a=>a.classList.toggle('active',a.getAttribute('href')==='#'+id));
   $('#nav').classList.remove('open');window.scrollTo(0,0);}
@@ -478,7 +672,7 @@ addEventListener('hashchange',show);show();
 $('#menuBtn').onclick=()=>$('#nav').classList.toggle('open');
 
 // application
-$('#appNo').value='APP/LAG/2026/'+String(Math.floor(Math.random()*9000)+1000);
+$('#appNo').value='APP/'+ST.c+'/2026/'+String(Math.floor(Math.random()*9000)+1000);
 $('#dateApplied').value='2026-10-15';
 $('#useOwner').onchange=e=>{if(e.target.checked)$('#propName').value=$('#ownerName').value;};
 $('#ownerName').oninput=()=>{if($('#useOwner').checked)$('#propName').value=$('#ownerName').value;};
@@ -517,6 +711,19 @@ $('#renTbl tbody').innerHTML=rc.map((c,i)=>`<tr><td>${c}</td><td><div class="inl
 function ren(){const v=rc.map((_,i)=>($(`input[name=r${i}]:checked`)||{}).value);
   $('#renBtn').disabled=!v.every(x=>x==='y');$('#renWarn').classList.toggle('hidden',!v.includes('n'));}
 $$('.rr').forEach(r=>r.onchange=ren);
+// state setup, onboarding, report
+$$('.lgaPick').forEach(l=>l.onchange=fillZones);
+$('#rBy').onchange=$('#rLga').onchange=renderReport;
+$('#obState').onchange=e=>$('#obCode').value=e.target.value;
+$('#obBtn').onclick=()=>{const s=STATES.find(x=>x.c===$('#obState').value);if(s){s.on=true;GEO[s.c]??={};renderStates();}};
+$('#scCat').innerHTML=Object.keys(CATS).map(k=>`<option>${k}</option>`).join('');
+function scLoad(){const v=CATS[$('#scCat').value];$('#scTypes').value=v.t;$('#scCrit').value=v.c.join('\n');}
+$('#scCat').onchange=scLoad;scLoad();
+$('#scSave').onclick=()=>{const v=CATS[$('#scCat').value];v.t=$('#scTypes').value.trim();v.c=$('#scCrit').value.split('\n').map(x=>x.trim()).filter(Boolean);fillCats();renderCats();};
+$('#lgaAdd').onclick=()=>{const n=$('#lgaName').value.trim();if(!n)return;GEO[ST.c][n]??=[];$('#lgaName').value=$('#lgaCode').value='';fillGeo();renderLga();renderZones();};
+$('#zAdd').onclick=()=>{const l=$('#zLga').value,n=$('#zName').value.trim();if(!l||!n)return;GEO[ST.c][l].push(n);$('#zName').value='';fillZones();renderLga();renderZones();};
+setState('LAG');
+
 $('#uploads').innerHTML='ABCDEF'.split('').map(l=>`<div class="upl c6"><b>${l}</b><span>Document ${l} <span class="hint">(type TBD)</span></span><input type="file"></div>`).join('');
 </script>
 </body>
